@@ -229,7 +229,17 @@ public class SocialSharing extends CordovaPlugin {
     cordova.getThreadPool().execute(new SocialSharingRunnable(callbackContext) {
       public void run() {
         String message = msg;
-        final boolean hasMultipleAttachments = files.length() > 1;
+        int totalRealFiles = 0;
+        try {
+          for (int i =  0; i < files.length(); i++)
+          {
+            if (!"".equals(files.getString(i))) 
+              totalRealFiles++;
+          }
+        } catch (Exception e) {
+          totalRealFiles = files.length();
+        }
+        final boolean hasMultipleAttachments = totalRealFiles > 1;
         final Intent sendIntent = new Intent(hasMultipleAttachments ? Intent.ACTION_SEND_MULTIPLE : Intent.ACTION_SEND);
         sendIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
 
@@ -251,6 +261,8 @@ public class SocialSharing extends CordovaPlugin {
                 } else {
                   sendIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
                 }
+              } else {
+              sendIntent.setType("text/plain");
               }
             } else {
               sendIntent.setType("text/plain");
